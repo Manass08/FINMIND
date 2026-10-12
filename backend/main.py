@@ -97,22 +97,48 @@ def get_transactions(
     return filtered_transactions[skip:skip + limit]
 
 
+
 @app.get("/transactions/summary")
 def get_transaction_summary():
     total_income = sum(
         t["amount"] for t in transactions
         if t["transaction_type"] == "income"
     )
+
     total_expenses = sum(
         t["amount"] for t in transactions
         if t["transaction_type"] == "expense"
     )
+
+    income_by_category = {}
+    expenses_by_category = {}
+
+    for transaction in transactions:
+        category = transaction["category"]
+        amount = transaction["amount"]
+
+        if transaction["transaction_type"] == "income":
+            income_by_category[category] = (
+                income_by_category.get(category, 0) + amount
+            )
+        else:
+            expenses_by_category[category] = (
+                expenses_by_category.get(category, 0) + amount
+            )
 
     return {
         "total_income": round(total_income, 2),
         "total_expenses": round(total_expenses, 2),
         "balance": round(total_income - total_expenses, 2),
         "transaction_count": len(transactions),
+        "income_by_category": {
+            category: round(amount, 2)
+            for category, amount in income_by_category.items()
+        },
+        "expenses_by_category": {
+            category: round(amount, 2)
+            for category, amount in expenses_by_category.items()
+        },
     }
 
 
