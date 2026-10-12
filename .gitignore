@@ -1,0 +1,10 @@
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.env
+node_modules/
+.next/
+dist/
+data/raw/
+models/*.pkl
