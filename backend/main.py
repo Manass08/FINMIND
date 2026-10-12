@@ -1,5 +1,5 @@
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import Literal
 from datetime import date
@@ -44,7 +44,6 @@ def create_transaction(transaction: TransactionCreate):
     }
 
     transactions.append(new_transaction)
-
     return new_transaction
 
 
@@ -54,7 +53,20 @@ def get_transactions(
     category: str | None = None,
     start_date: date | None = None,
     end_date: date | None = None,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
 ):
+    # Validate the date range before filtering.
+    if (
+        start_date is not None
+        and end_date is not None
+        and start_date > end_date
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="start_date cannot be after end_date",
+        )
+
     filtered_transactions = transactions
 
     if transaction_type is not None:
@@ -66,7 +78,7 @@ def get_transactions(
     if category is not None:
         filtered_transactions = [
             t for t in filtered_transactions
-            if t["category"].lower() == category.strip().lower()
+            if t["category"].strip().lower() == category.strip().lower()
         ]
 
     if start_date is not None:
@@ -81,13 +93,9 @@ def get_transactions(
             if date.fromisoformat(t["transaction_date"]) <= end_date
         ]
 
-    if start_date is not None and end_date is not None and start_date > end_date:
-        raise HTTPException(
-            status_code=400,
-            detail="start_date cannot be after end_date",
-        )
+    # Return only the requested page.
+    return filtered_transactions[skip:skip + limit]
 
-    return filtered_transactions
 
 @app.get("/transactions/summary")
 def get_transaction_summary():
