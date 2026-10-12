@@ -126,3 +126,17 @@ def get_transaction(transaction_id: str):
         status_code=404,
         detail="Transaction not found",
     )
+@app.delete("/transactions/{transaction_id}")
+def delete_transaction(transaction_id: str):
+    for index, transaction in enumerate(transactions):
+        if transaction["id"] == transaction_id:
+            deleted_transaction = transactions.pop(index)
+            return {
+                "message": "Transaction deleted successfully",
+                "transaction": deleted_transaction,
+            }
+
+    raise HTTPException(
+        status_code=404,
+        detail="Transaction not found",
+    )
