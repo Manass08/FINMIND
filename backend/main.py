@@ -49,9 +49,45 @@ def create_transaction(transaction: TransactionCreate):
 
 
 @app.get("/transactions")
-def get_transactions():
-    return transactions
+def get_transactions(
+    transaction_type: Literal["income", "expense"] | None = None,
+    category: str | None = None,
+    start_date: date | None = None,
+    end_date: date | None = None,
+):
+    filtered_transactions = transactions
 
+    if transaction_type is not None:
+        filtered_transactions = [
+            t for t in filtered_transactions
+            if t["transaction_type"] == transaction_type
+        ]
+
+    if category is not None:
+        filtered_transactions = [
+            t for t in filtered_transactions
+            if t["category"].lower() == category.strip().lower()
+        ]
+
+    if start_date is not None:
+        filtered_transactions = [
+            t for t in filtered_transactions
+            if date.fromisoformat(t["transaction_date"]) >= start_date
+        ]
+
+    if end_date is not None:
+        filtered_transactions = [
+            t for t in filtered_transactions
+            if date.fromisoformat(t["transaction_date"]) <= end_date
+        ]
+
+    if start_date is not None and end_date is not None and start_date > end_date:
+        raise HTTPException(
+            status_code=400,
+            detail="start_date cannot be after end_date",
+        )
+
+    return filtered_transactions
 
 @app.get("/transactions/summary")
 def get_transaction_summary():
