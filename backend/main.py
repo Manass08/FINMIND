@@ -140,3 +140,24 @@ def delete_transaction(transaction_id: str):
         status_code=404,
         detail="Transaction not found",
     )
+
+
+@app.put("/transactions/{transaction_id}")
+def update_transaction(
+    transaction_id: str,
+    updated_data: TransactionCreate,
+):
+    for transaction in transactions:
+        if transaction["id"] == transaction_id:
+            transaction.update(
+                updated_data.model_dump(mode="json")
+            )
+            return {
+                "message": "Transaction updated successfully",
+                "transaction": transaction,
+            }
+
+    raise HTTPException(
+        status_code=404,
+        detail="Transaction not found",
+    )
