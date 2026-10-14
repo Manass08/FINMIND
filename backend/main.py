@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from typing import Literal
 from datetime import date
+from decimal import Decimal
 from uuid import uuid4
 
 app = FastAPI(
@@ -12,26 +13,21 @@ app = FastAPI(
 )
 
 
-# -------------------------
-# Data Model
-# -------------------------
-
 class TransactionCreate(BaseModel):
-    amount: float = Field(gt=0)
+    amount: Decimal = Field(
+        gt=0,
+        max_digits=12,
+        decimal_places=2,
+    )
     transaction_type: Literal["income", "expense"]
     category: str = Field(min_length=1, max_length=50)
     description: str = Field(min_length=1, max_length=200)
     transaction_date: date
 
 
-# Temporary in-memory storage.
-# PostgreSQL will be added later.
+# Temporary storage. PostgreSQL will be added later.
 transactions = []
 
-
-# -------------------------
-# Home and Health
-# -------------------------
 
 @app.get("/")
 def home():
@@ -46,24 +42,15 @@ def health_check():
     return {"status": "healthy"}
 
 
-# -------------------------
-# Create Transaction
-# -------------------------
-
 @app.post("/transactions", status_code=201)
 def create_transaction(transaction: TransactionCreate):
     new_transaction = {
         "id": str(uuid4()),
         **transaction.model_dump(mode="json"),
     }
-
     transactions.append(new_transaction)
     return new_transaction
 
-
-# -------------------------
-# List, Filter, Sort and Paginate
-# -------------------------
 
 @app.get("/transactions")
 def get_transactions(
@@ -76,7 +63,6 @@ def get_transactions(
     sort_by: Literal["date", "amount"] = "date",
     order: Literal["asc", "desc"] = "desc",
 ):
-    # Validate the date range first.
     if (
         start_date is not None
         and end_date is not None
@@ -89,14 +75,12 @@ def get_transactions(
 
     filtered_transactions = transactions.copy()
 
-    # Filter by transaction type.
     if transaction_type is not None:
         filtered_transactions = [
             t for t in filtered_transactions
             if t["transaction_type"] == transaction_type
         ]
 
-    # Filter by category, ignoring case and surrounding spaces.
     if category is not None:
         filtered_transactions = [
             t for t in filtered_transactions
@@ -104,21 +88,18 @@ def get_transactions(
             == category.strip().lower()
         ]
 
-    # Filter by start date.
     if start_date is not None:
         filtered_transactions = [
             t for t in filtered_transactions
             if date.fromisoformat(t["transaction_date"]) >= start_date
         ]
 
-    # Filter by end date.
     if end_date is not None:
         filtered_transactions = [
             t for t in filtered_transactions
             if date.fromisoformat(t["transaction_date"]) <= end_date
         ]
 
-    # Sort the filtered results.
     if sort_by == "date":
         filtered_transactions.sort(
             key=lambda t: t["transaction_date"],
@@ -126,17 +107,12 @@ def get_transactions(
         )
     else:
         filtered_transactions.sort(
-            key=lambda t: t["amount"],
+            key=lambda t: Decimal(str(t["amount"])),
             reverse=(order == "desc"),
         )
 
-    # Calculate total AFTER filtering but BEFORE pagination.
     total = len(filtered_transactions)
-
-    # Apply pagination.
-    paginated_transactions = filtered_transactions[
-        skip:skip + limit
-    ]
+    paginated_transactions = filtered_transactions[skip:skip + limit]
 
     return {
         "total": total,
@@ -147,22 +123,24 @@ def get_transactions(
     }
 
 
-# -------------------------
-# Financial Summary
-# -------------------------
-
 @app.get("/transactions/summary")
 def get_transaction_summary():
     total_income = sum(
-        t["amount"]
-        for t in transactions
-        if t["transaction_type"] == "income"
+        (
+            Decimal(str(t["amount"]))
+            for t in transactions
+            if t["transaction_type"] == "income"
+        ),
+        Decimal("0.00"),
     )
 
     total_expenses = sum(
-        t["amount"]
-        for t in transactions
-        if t["transaction_type"] == "expense"
+        (
+            Decimal(str(t["amount"]))
+            for t in transactions
+            if t["transaction_type"] == "expense"
+        ),
+        Decimal("0.00"),
     )
 
     income_by_category = {}
@@ -170,36 +148,34 @@ def get_transaction_summary():
 
     for transaction in transactions:
         category = transaction["category"]
-        amount = transaction["amount"]
+        amount = Decimal(str(transaction["amount"]))
 
         if transaction["transaction_type"] == "income":
             income_by_category[category] = (
-                income_by_category.get(category, 0) + amount
+                income_by_category.get(category, Decimal("0.00"))
+                + amount
             )
         else:
             expenses_by_category[category] = (
-                expenses_by_category.get(category, 0) + amount
+                expenses_by_category.get(category, Decimal("0.00"))
+                + amount
             )
 
     return {
-        "total_income": round(total_income, 2),
-        "total_expenses": round(total_expenses, 2),
-        "balance": round(total_income - total_expenses, 2),
+        "total_income": float(total_income),
+        "total_expenses": float(total_expenses),
+        "balance": float(total_income - total_expenses),
         "transaction_count": len(transactions),
         "income_by_category": {
-            category: round(amount, 2)
+            category: float(amount)
             for category, amount in income_by_category.items()
         },
         "expenses_by_category": {
-            category: round(amount, 2)
+            category: float(amount)
             for category, amount in expenses_by_category.items()
         },
     }
 
-
-# -------------------------
-# Get One Transaction
-# -------------------------
 
 @app.get("/transactions/{transaction_id}")
 def get_transaction(transaction_id: str):
@@ -213,10 +189,6 @@ def get_transaction(transaction_id: str):
     )
 
 
-# -------------------------
-# Update Transaction
-# -------------------------
-
 @app.put("/transactions/{transaction_id}")
 def update_transaction(
     transaction_id: str,
@@ -227,7 +199,6 @@ def update_transaction(
             transaction.update(
                 updated_data.model_dump(mode="json")
             )
-
             return {
                 "message": "Transaction updated successfully",
                 "transaction": transaction,
@@ -239,16 +210,11 @@ def update_transaction(
     )
 
 
-# -------------------------
-# Delete Transaction
-# -------------------------
-
 @app.delete("/transactions/{transaction_id}")
 def delete_transaction(transaction_id: str):
     for index, transaction in enumerate(transactions):
         if transaction["id"] == transaction_id:
             deleted_transaction = transactions.pop(index)
-
             return {
                 "message": "Transaction deleted successfully",
                 "transaction": deleted_transaction,
