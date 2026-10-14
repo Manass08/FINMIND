@@ -242,3 +242,49 @@ def test_transaction_summary_totals():
     assert data["transaction_count"] == 2
     assert data["income_by_category"]["Salary"] == 50000
     assert data["expenses_by_category"]["Food"] == 500
+
+
+def test_transaction_summary_multiple_categories():
+    test_transactions = [
+        {
+            "amount": 1000,
+            "transaction_type": "income",
+            "category": "Salary",
+            "description": "Salary",
+            "transaction_date": "2026-10-14",
+        },
+        {
+            "amount": 200,
+            "transaction_type": "expense",
+            "category": "Food",
+            "description": "Lunch",
+            "transaction_date": "2026-10-14",
+        },
+        {
+            "amount": 300,
+            "transaction_type": "expense",
+            "category": "Travel",
+            "description": "Bus",
+            "transaction_date": "2026-10-14",
+        },
+    ]
+
+    for transaction in test_transactions:
+        response = client.post(
+            "/transactions",
+            json=transaction,
+        )
+        assert response.status_code == 201
+
+    response = client.get("/transactions/summary")
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["total_income"] == 1000
+    assert data["total_expenses"] == 500
+    assert data["balance"] == 500
+    assert data["transaction_count"] == 3
+    assert data["income_by_category"]["Salary"] == 1000
+    assert data["expenses_by_category"]["Food"] == 200
+    assert data["expenses_by_category"]["Travel"] == 300
