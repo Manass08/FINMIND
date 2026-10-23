@@ -1,4 +1,15 @@
+
 fastapi
-uvicorn[standard]
+uvicorn
+pydantic
+sqlalchemy
+psycopg[binary]
+python-dotenv
 pytest
 httpx
+pwdlib[argon2]
+PyJWT
+email-validator
+google-auth
+scikit-learn
+joblib

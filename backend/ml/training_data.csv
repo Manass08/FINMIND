@@ -1,0 +1,45 @@
+description,category
+lunch at restaurant,Food
+pizza delivery,Food
+grocery store,Food
+coffee shop,Food
+breakfast sandwich,Food
+dinner takeaway,Food
+milk and bread,Food
+vegetables market,Food
+uber ride,Transport
+bus ticket,Transport
+metro recharge,Transport
+auto rickshaw,Transport
+cab to office,Transport
+train station taxi,Transport
+bought new shoes,Shopping
+online clothing order,Shopping
+electronics store,Shopping
+shopping mall purchase,Shopping
+phone accessories,Shopping
+monthly apartment rent,Rent
+house rent payment,Rent
+rent for flat,Rent
+doctor consultation,Health
+medicine from pharmacy,Health
+hospital bill,Health
+medical checkup,Health
+online course fee,Education
+college tuition payment,Education
+textbooks purchase,Education
+school fees,Education
+electricity bill,Bills
+internet bill,Bills
+mobile phone recharge,Bills
+water bill payment,Bills
+streaming subscription,Entertainment
+movie tickets,Entertainment
+concert ticket,Entertainment
+video game purchase,Entertainment
+hotel booking,Travel
+flight ticket,Travel
+holiday expenses,Travel
+bus ticket for vacation,Travel
+miscellaneous expense,Other
+unclassified payment,Other
