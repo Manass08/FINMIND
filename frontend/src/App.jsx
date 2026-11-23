@@ -2,7 +2,7 @@ import { Children, useEffect, useMemo, useRef, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import FinmindEnhancements from "./FinmindEnhancements.jsx";
 import "./App.css";
-const API = "http://127.0.0.1:8000";
+const API = (import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000").replace(/\/$/, "");
 
 function AuthScreen({ onLogin, theme, onThemeChange }) {
     const [mode, setMode] = useState("login");
