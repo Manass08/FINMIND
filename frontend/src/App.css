@@ -7074,3 +7074,220 @@ button {
   justify-content: center !important;
   border-radius: 12px !important;
 }
+
+
+/* --------------------------------------------------------------------------
+   FINMIND UI refinement layer
+   Focus: responsive behavior, keyboard accessibility, and restrained motion.
+   -------------------------------------------------------------------------- */
+
+:where(button, a, input, select, textarea, [role="button"], [tabindex]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent, #6d8cff) 72%, white);
+  outline-offset: 3px;
+}
+
+:where(button, a, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(button, .nav-item, .nav-link, .quick-action, .metric-card, .card, .transaction-card) {
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+button:disabled,
+[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+input,
+select,
+textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+img,
+svg {
+  max-width: 100%;
+}
+
+.table-scroll,
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1100px) {
+  .finmind-app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sidebar {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .main-area,
+  .main-panel {
+    min-width: 0;
+  }
+
+  .overview-layout,
+  .lower-grid,
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .right-column {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .finmind-app {
+    display: block;
+    min-height: 100dvh;
+  }
+
+  .sidebar {
+    position: relative;
+    inset: auto;
+    height: auto;
+    min-height: 0;
+    padding: 12px 16px;
+  }
+
+  .sidebar-nav,
+  .side-nav {
+    display: flex;
+    gap: 8px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 8px 0;
+    scrollbar-width: thin;
+  }
+
+  .sidebar-nav > *,
+  .side-nav > * {
+    flex: 0 0 auto;
+  }
+
+  .sidebar-bottom,
+  .upgrade-card {
+    display: none;
+  }
+
+  .main-area,
+  .main-panel {
+    padding: 0 14px 24px;
+  }
+
+  .topbar {
+    min-height: 58px;
+    gap: 10px;
+    padding: 10px 0;
+  }
+
+  .search-box {
+    min-width: 0;
+    max-width: 48vw;
+  }
+
+  .page-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-block: 18px;
+  }
+
+  .heading-actions,
+  .topbar-actions {
+    flex-wrap: wrap;
+  }
+
+  .metrics-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .metric-card,
+  .card,
+  .cash-flow-card,
+  .transactions-card,
+  .insights-card {
+    min-width: 0;
+  }
+
+  .transaction-modal,
+  .auth-card {
+    width: min(100% - 24px, 560px);
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .modal-backdrop {
+    padding: 12px;
+    align-items: center;
+  }
+
+  .transactions-table {
+    min-width: 620px;
+  }
+}
+
+@media (max-width: 480px) {
+  .metrics-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .main-area,
+  .main-panel {
+    padding-inline: 10px;
+  }
+
+  .page-heading h1,
+  .page-heading h2 {
+    font-size: clamp(1.35rem, 6vw, 1.8rem);
+  }
+
+  .heading-actions > button,
+  .modal-actions > button,
+  .form-buttons > button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .auth-shell {
+    padding: 12px;
+  }
+
+  .auth-card {
+    padding: 22px 18px;
+  }
+
+  .topbar-actions .search-box {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
