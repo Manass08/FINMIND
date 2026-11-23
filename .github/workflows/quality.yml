@@ -12,6 +12,20 @@ permissions:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: finmind
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d finmind"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     env:
       FINMIND_DATABASE_URL: postgresql+psycopg://ci:ci@localhost:5432/finmind
       JWT_SECRET_KEY: ci-only-not-a-real-secret
